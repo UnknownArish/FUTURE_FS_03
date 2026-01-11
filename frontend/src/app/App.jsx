@@ -17,12 +17,14 @@ export default function App() {
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
         />
         
-        <div className="flex-1 flex flex-col min-w-0">
-          <Topbar onMenuClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
-          
-          <main className="flex-1 overflow-y-auto scrollbar-hide bg-gradient-to-b from-transparent to-black/30 px-8 py-6">
-            <AppRouter />
-          </main>
+        <div className="flex-1 flex flex-col min-w-0 h-full py-2 pr-2">
+           <div className="flex-1 bg-[var(--bg-secondary)] rounded-lg overflow-hidden relative flex flex-col">
+              <Topbar onMenuClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
+              
+              <main className="flex-1 overflow-y-auto scrollbar-hide bg-gradient-to-b from-[#1f1f1f] to-[#121212] px-8 py-6">
+                <AppRouter />
+              </main>
+          </div>
         </div>
       </div>
 

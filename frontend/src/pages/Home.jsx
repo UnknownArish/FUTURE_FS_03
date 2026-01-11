@@ -1,11 +1,13 @@
 // src/pages/Home.jsx
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PlaylistCard from '../components/PlaylistCard';
 import { playlists } from './homePlaylists';
 import { usePlayer } from '../context/PlayerContext';
 
 export default function Home() {
   const { playTrack } = usePlayer();
+  const navigate = useNavigate();
   const [greeting, setGreeting] = useState('Good evening');
 
   useEffect(() => {
@@ -73,8 +75,8 @@ export default function Home() {
           {quickPicks.map((playlist) => (
             <div 
               key={playlist.id}
-              onClick={() => playTrack({ ...playlist, artist: 'Various Artists' })}
-              className="flex items-center gap-4 bg-[var(--bg-secondary)]/60 hover:bg-[var(--bg-secondary)] rounded-lg overflow-hidden cursor-pointer transition-all hover:scale-[1.02] group glass border border-transparent hover:border-[var(--neon-green)]/30"
+              onClick={() => navigate(`/playlist/${playlist.id}`)}
+              className="flex items-center gap-4 bg-[var(--bg-secondary)]/60 hover:bg-[var(--bg-secondary)] rounded-[4px] overflow-hidden cursor-pointer transition-colors group"
             >
               <img 
                 src={playlist.image} 
@@ -84,8 +86,8 @@ export default function Home() {
               <div className="flex-1 py-2 pr-4 flex items-center justify-between">
                 <span className="font-bold truncate text-[var(--text-primary)]">{playlist.title}</span>
                 {/* Play button that appears on hover */}
-                <div className="w-10 h-10 rounded-full bg-[var(--neon-green)] flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0">
-                  <svg className="w-5 h-5 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-full bg-[var(--neon-green)] flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all mr-2 hover:scale-105">
+                  <svg className="w-6 h-6 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
                 </div>
@@ -100,7 +102,7 @@ export default function Home() {
         <section key={index} className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold mb-1 hover:underline cursor-pointer decoration-[var(--neon-green)] text-[var(--text-primary)]">{category.name}</h2>
+              <h2 className="text-2xl font-bold mb-1 hover:underline cursor-pointer decoration-[var(--text-primary)] text-[var(--text-primary)]">{category.name}</h2>
               <p className="text-sm text-[var(--text-secondary)]">
                 {category.description}
               </p>
@@ -118,6 +120,7 @@ export default function Home() {
                 description={playlist.description}
                 image={playlist.image}
                 id={playlist.id}
+                onClick={() => navigate(`/playlist/${playlist.id}`)}
               />
             ))}
           </div>
