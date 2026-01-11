@@ -21,7 +21,7 @@ export default function App() {
            <div className="flex-1 bg-[var(--bg-secondary)] rounded-lg overflow-hidden relative flex flex-col">
               <Topbar onMenuClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
               
-              <main className="flex-1 overflow-y-auto scrollbar-hide bg-gradient-to-b from-[#1f1f1f] to-[#121212] px-8 py-6">
+              <main className="flex-1 overflow-y-auto scrollbar-hide bg-gradient-to-b from-[var(--bg-tertiary)] to-[var(--bg-secondary)] px-8 py-6">
                 <AppRouter />
               </main>
           </div>

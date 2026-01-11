@@ -22,7 +22,7 @@ export default function Topbar({ onMenuClick }) {
   const showSearch = true; 
 
   return (
-    <header className="h-16 bg-black/50 sticky top-0 z-30 px-6 flex items-center justify-between backdrop-blur-md">
+    <header className="h-16 bg-[var(--bg-primary)]/50 sticky top-0 z-30 px-6 flex items-center justify-between backdrop-blur-md">
       {/* Left Section: Nav & Search */}
       <div className="flex items-center gap-4 flex-1">
         <div className="flex items-center gap-2 flex-shrink-0">

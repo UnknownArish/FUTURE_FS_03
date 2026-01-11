@@ -24,7 +24,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   
   /* SPOTIFY ORIGINAL BACKGROUND */
-  background-color: #000000;
+  background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }

@@ -162,7 +162,7 @@ export default function Player() {
         </div>
       )}
 
-      <div className="w-full h-24 bg-black border-t border-[#282828] px-4 flex items-center justify-between z-40">
+      <div className="w-full h-24 bg-[var(--bg-primary)] border-t border-[var(--border-color)] px-4 flex items-center justify-between z-40">
         
         {/* Track Info */}
         <div className="w-1/4 flex items-center gap-4">
