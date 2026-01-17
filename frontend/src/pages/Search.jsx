@@ -1,7 +1,7 @@
 // src/pages/Search.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SongRow from '../components/SongRow';
-import PlaylistCard from '../components/PlaylistCard';
+import { usePlayer } from '../context/PlayerContext';
 
 const categories = [
   { id: 1, title: "Podcasts", color: "from-orange-500 to-red-500", image: "https://picsum.photos/200/200?random=10" },
@@ -20,46 +20,46 @@ const categories = [
 
 export default function Search() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all'); // all, songs, playlists, artists
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { playTrack } = usePlayer();
 
-  // Mock search results (replace with real API data)
-  const mockSongs = [
-    {
-      id: 1,
-      title: 'Blinding Lights',
-      artist: 'The Weeknd',
-      album: 'After Hours',
-      duration: 200,
-      image: 'https://i.scdn.co/image/ab67616d00001e02a0b8e1c7c7c7c7c7c7c7c7'
-    },
-    {
-      id: 2,
-      title: 'Levitating',
-      artist: 'Dua Lipa',
-      album: 'Future Nostalgia',
-      duration: 203,
-      image: 'https://i.scdn.co/image/ab67616d00001e02b1b1b1b1b1b1b1b1b1b1b1b1'
-    },
-  ];
+  // Debounce search to avoid too many API calls
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.length > 2) {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`http://localhost:3001/api/search?q=${encodeURIComponent(searchQuery)}`);
+          const data = await response.json();
+          
+          if(data.data) {
+             const tracks = data.data.map(track => ({
+                id: track.id,
+                title: track.title,
+                artist: track.artist.name,
+                album: track.album.title,
+                image: track.album.cover_medium,
+                duration: track.duration,
+                audio: track.preview
+            }));
+            setSearchResults(tracks);
+          }
+        } catch (error) {
+          console.error("Search failed:", error);
+        } finally {
+            setIsLoading(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
 
-  const mockPlaylists = [
-    {
-      id: 1,
-      title: 'Today\'s Top Hits',
-      description: 'The hottest tracks right now',
-      image: 'https://i.scdn.co/image/ab67706f00000002c5c5c5c5c5c5c5c5c5c5c5c5'
-    },
-  ];
-
-  const tabs = [
-    { id: 'all', label: 'All' },
-    { id: 'songs', label: 'Songs' },
-    { id: 'playlists', label: 'Playlists' },
-    { id: 'artists', label: 'Artists' },
-  ];
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       {/* Search Header */}
       <div className="space-y-4">
         <h1 className="text-4xl font-bold neon-text">Search</h1>
@@ -85,89 +85,54 @@ export default function Search() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="What do you want to listen to?"
             className="w-full pl-14 pr-6 py-4 text-lg rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] border-2 border-[var(--border-color)] focus:border-[var(--neon-green)] focus:ring-2 focus:ring-[var(--neon-green)]/20 transition-all outline-none"
+            autoFocus
           />
-        </div>
-
-        {/* Filter Tabs */}
-        <div className="flex gap-3 overflow-x-auto pb-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-2 rounded-full font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-[var(--neon-green)] text-black'
-                  : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
       </div>
 
-      {/* Search Results */}
       {searchQuery ? (
-        <div className="space-y-8">
-          {/* Songs Section */}
-          {(activeTab === 'all' || activeTab === 'songs') && (
-            <section className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">Songs</h2>
-              <div className="space-y-1">
-                {mockSongs.map((song, index) => (
-                  <SongRow
-                    key={song.id}
-                    song={song}
-                    index={index}
-                    songs={mockSongs}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Playlists Section */}
-          {(activeTab === 'all' || activeTab === 'playlists') && (
-            <section className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">Playlists</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {mockPlaylists.map((playlist) => (
-                  <PlaylistCard key={playlist.id} {...playlist} />
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="space-y-6">
+           {isLoading ? (
+               <div className="flex items-center justify-center py-10">
+                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+               </div>
+           ) : (
+             <>
+               {searchResults.length > 0 ? (
+                 <div className="flex flex-col gap-2">
+                    <h2 className="text-xl font-bold mb-4">Top Results</h2>
+                    {searchResults.map((song, index) => (
+                       <SongRow 
+                          key={song.id} 
+                          song={song} 
+                          index={index} 
+                          onClick={() => playTrack(song, searchResults)}
+                       />
+                    ))}
+                 </div>
+               ) : (
+                   <div className="text-center py-10 text-[var(--text-secondary)]">
+                       No results found for "{searchQuery}"
+                   </div>
+               )}
+             </>
+           )}
         </div>
       ) : (
-        /* Browse Categories When No Search */
-        <div className="p-8 pb-32 animate-fade-in-up">
-          <h2 className="text-3xl font-bold mb-6 neon-text">Browse All</h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {categories.map((category) => (
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold">Browse all</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            {categories.map(category => (
               <div 
-                key={category.id}
-                className={`
-                  relative h-48 rounded-xl overflow-hidden cursor-pointer group 
-                  bg-gradient-to-br ${category.color}
-                  hover:scale-[1.02] transition-all duration-300
-                  shadow-lg hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]
-                `}
+                key={category.id} 
+                className={`h-48 rounded-lg p-4 relative overflow-hidden bg-gradient-to-br ${category.color} hover:scale-[1.02] transition-transform cursor-pointer group`}
               >
-                {/* Title */}
-                <h3 className="absolute top-4 left-4 text-2xl font-bold text-white drop-shadow-md z-10 break-words w-2/3">
-                  {category.title}
-                </h3>
-
-                {/* Image (Rotated and positioned off-screen like Spotify) */}
+                <h3 className="text-2xl font-bold text-white break-words max-w-[80%]">{category.title}</h3>
                 <img 
                   src={category.image} 
-                  alt={category.title}
-                  className="absolute -bottom-2 -right-2 w-28 h-28 object-cover shadow-2xl transform rotate-[25deg] translate-x-[10%] translate-y-[5%] group-hover:rotate-[30deg] group-hover:scale-110 transition-transform duration-300"
+                  className="absolute -bottom-4 -right-4 w-28 h-28 rotate-[25deg] shadow-lg rounded-md group-hover:rotate-[30deg] transition-all" 
+                  alt={category.title} 
                 />
-                
-                {/* Glass Overlay on Hover */}
-                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
               </div>
             ))}
           </div>
